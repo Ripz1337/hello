@@ -1,0 +1,149 @@
+local UIS = game:GetService("UserInputService")
+
+local players = {}
+function dragify(Frame)
+    dragToggle = nil
+    local dragSpeed = 0
+    dragInput = nil
+    dragStart = nil
+    local dragPos = nil
+    function updateInput(input)
+        local Delta = input.Position - dragStart
+        local Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + Delta.X, startPos.Y.Scale, startPos.Y.Offset + Delta.Y)
+        game:GetService("TweenService"):Create(Frame, TweenInfo.new(0.1), {Position = Position}):Play()
+    end
+    Frame.InputBegan:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = Frame.Position
+            input.Changed:Connect(function()
+                if (input.UserInputState == Enum.UserInputState.End) then
+                    dragToggle = false
+                end
+            end)
+        end
+    end)
+    Frame.InputChanged:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            dragInput = input
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if (input == dragInput and dragToggle) then
+            updateInput(input)
+        end
+    end)
+end
+
+local Detector_Menu         = Instance.new("ScreenGui")
+local Detector_Main         = Instance.new("Frame")
+local Detector_TopBorder    = Instance.new("Frame")
+local Detector_Title        = Instance.new("TextLabel")
+
+local Detector_Frame        = Instance.new("Frame")
+
+Detector_Menu.Name = "Detector_Menu"
+Detector_Menu.Parent = game.CoreGui
+
+Detector_Main.Name = "Detector_Main"
+Detector_Main.Parent = Detector_Menu
+Detector_Main.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+Detector_Main.BackgroundTransparency = 0
+Detector_Main.Position = UDim2.new(0.5, -150, 0.5, -100)
+Detector_Main.Size = UDim2.new(0, 150, 0, 50)
+
+Detector_TopBorder.Name = "Detector_TopBorder"
+Detector_TopBorder.Parent = Detector_Main
+Detector_TopBorder.BackgroundColor3 = Color3.fromRGB(100, 59, 154)
+Detector_TopBorder.BackgroundTransparency = 0
+Detector_TopBorder.Position = UDim2.new(0, 0, 0, -3)
+Detector_TopBorder.Size = UDim2.new(0, 150, 0, 3)
+
+Detector_Title.Name = "Detector_Title"
+Detector_Title.Parent = Detector_Main
+Detector_Title.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Detector_Title.BackgroundTransparency = 1
+Detector_Title.Position = UDim2.new(0.5, -100, 0, 0)
+Detector_Title.Font = Enum.Font.SourceSans
+Detector_Title.Text = "Players Detected"
+Detector_Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Detector_Title.TextSize = 20
+
+Detector_Frame.Name = "Detector_Frame"
+Detector_Frame.Parent = Detector_Main
+Detector_Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Detector_Frame.BackgroundTransparency = 1
+Detector_Frame.Position = UDim2.new(0.5, -65, 0.25, 15)
+Detector_Frame.Size = UDim2.new(0, 140, 0, 23)
+
+local Detector_UIListLayout = Instance.new("UIListLayout")
+Detector_UIListLayout.Parent = Detector_Frame
+Detector_UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+Detector_UIListLayout.Padding = UDim.new(0, 5)
+
+Detector_Title.Position = UDim2.new(0, Detector_Title.TextBounds.X / 2 + 5, 0, Detector_Title.TextBounds.Y / 2 + 5)
+
+local function AddPlayer(name, reason)
+    local Keybind = Instance.new("TextLabel")
+    Keybind.Name = name
+    Keybind.Parent = Detector_Frame
+    Keybind.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Keybind.BackgroundTransparency = 1
+    Keybind.Position = UDim2.new(0, 0, 0, 0)
+    Keybind.Size = UDim2.new(0, 150, 0, 15)
+    Keybind.Font = Enum.Font.SourceSans
+    if reason then
+        Keybind.Text = name .. " - " .. reason
+    else
+        Keybind.Text = name
+    end
+    Keybind.TextColor3 = Color3.fromRGB(0, 255, 0)
+    Keybind.TextSize = 17
+    Keybind.TextXAlignment = Enum.TextXAlignment.Left
+
+    -- add keybind to keybinds table
+    --keybind[name] = key
+
+    -- update menu and KeybindsFrame Y size
+    Detector_Main.Size = UDim2.new(0, 150, 0, 40 + Detector_Frame.UIListLayout.AbsoluteContentSize.Y)
+    Detector_Frame.Position = UDim2.new(0, 15, 0, 30)
+    Detector_Frame.Size = UDim2.new(0, 140, 0, 10 + Detector_Frame.UIListLayout.AbsoluteContentSize.Y)
+end
+
+local function RemovePlayer(name)
+    -- remove keybind from KeybindsFrame
+    Detector_Frame[name]:Destroy()
+
+    -- remove keybind from keybinds table
+    --keybind[name] = nil
+
+    -- update menu and KeybindsFrame Y size
+    Detector_Main.Size = UDim2.new(0, 150, 0, 40 + Detector_Frame.UIListLayout.AbsoluteContentSize.Y)
+    Detector_Frame.Position = UDim2.new(0, 15, 0, 30)
+    Detector_Frame.Size = UDim2.new(0, 140, 0, 10 + Detector_Frame.UIListLayout.AbsoluteContentSize.Y)
+end
+
+local function Toggle(bool)
+    Detector_Menu.Enabled = bool
+end
+
+dragify(Detector_Main)
+
+
+-- place Menu in the center left of the screen
+Detector_Main.Position = UDim2.new(0, 0, 0.5, -Detector_Main.AbsoluteSize.Y / 2)
+
+Detector_Main.Size = UDim2.new(0, 150, 0, 40 + Detector_Frame.UIListLayout.AbsoluteContentSize.Y)
+Detector_Frame.Position = UDim2.new(0, 15, 0, 30)
+Detector_Frame.Size = UDim2.new(0, 140, 0, 10 + Detector_Frame.UIListLayout.AbsoluteContentSize.Y)
+
+
+local Functions = {}
+
+Functions.AddPlayer = AddPlayer
+Functions.RemovePlayer = RemovePlayer
+Functions.Toggle = Toggle
+
+
+return Functions
