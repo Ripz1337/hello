@@ -816,3 +816,9 @@ resume(create(function()
         FPS = 0
     end
 end))
+
+Environment.Load = Load -- lol.Load()
+
+setmetatable(Environment, {__call = Load})
+
+return Environment
